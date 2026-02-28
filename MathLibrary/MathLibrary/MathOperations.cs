@@ -2,33 +2,78 @@
 
 namespace MathLibrary
 {
+    /// <summary>
+    /// Класс для выполнения математических операций
+    /// </summary>
     public class MathOperations
     {
-        // Метод для возведения в степень с проверками
+        /// <summary>
+        /// Возводит число в указанную степень
+        /// </summary>
+        /// <param name="baseNumber">Основание степени</param>
+        /// <param name="exponent">Показатель степени</param>
+        /// <returns>Результат возведения в степень</returns>
+        /// <exception cref="ArgumentException">Выбрасывается при некорректных аргументах</exception>
         public static double Power(double baseNumber, double exponent)
+        {
+            ValidatePowerArguments(baseNumber, exponent);
+            return Math.Pow(baseNumber, exponent);
+        }
+
+        /// <summary>
+        /// Вычисляет факториал числа
+        /// </summary>
+        /// <param name="n">Неотрицательное целое число (максимум 20)</param>
+        /// <returns>Факториал числа n</returns>
+        /// <exception cref="ArgumentException">Выбрасывается при некорректных аргументах</exception>
+        public static long Factorial(int n)
+        {
+            ValidateFactorialArgument(n);
+            return ComputeFactorial(n);
+        }
+
+        /// <summary>
+        /// Решает квадратное уравнение вида ax^2 + bx + c = 0
+        /// </summary>
+        /// <param name="a">Коэффициент при x^2 (не может быть равен 0)</param>
+        /// <param name="b">Коэффициент при x</param>
+        /// <param name="c">Свободный член</param>
+        /// <returns>Массив действительных корней уравнения</returns>
+        /// <exception cref="ArgumentException">Выбрасывается при a = 0</exception>
+        public static double[] SolveQuadratic(double a, double b, double c)
+        {
+            ValidateQuadraticArguments(a);
+
+            double discriminant = CalculateDiscriminant(a, b, c);
+            return FindRoots(a, b, discriminant);
+        }
+
+        #region Приватные вспомогательные методы
+
+        private static void ValidatePowerArguments(double baseNumber, double exponent)
         {
             if (double.IsNaN(baseNumber) || double.IsNaN(exponent))
                 throw new ArgumentException("Аргументы не могут быть NaN");
 
             if (double.IsInfinity(baseNumber) || double.IsInfinity(exponent))
                 throw new ArgumentException("Аргументы не могут быть бесконечностью");
-
-            return Math.Pow(baseNumber, exponent);
         }
 
-        // Метод для вычисления факториала с проверками
-        public static long Factorial(int n)
+        private static void ValidateFactorialArgument(int n)
         {
             if (n < 0)
-                throw new ArgumentException("Факториал отрицательного числа не определен");
+                throw new ArgumentException("Факториал отрицательного числа не определен", nameof(n));
 
             if (n > 20)
-                throw new ArgumentException("Факториал >20 вызывает переполнение типа long");
+                throw new ArgumentException("Факториал >20 вызывает переполнение", nameof(n));
+        }
 
+        private static long ComputeFactorial(int n)
+        {
             long result = 1;
             for (int i = 2; i <= n; i++)
             {
-                checked // Проверяем переполнение
+                checked
                 {
                     result *= i;
                 }
@@ -36,23 +81,25 @@ namespace MathLibrary
             return result;
         }
 
-        // Метод для решения квадратного уравнения с проверками
-        public static double[] SolveQuadratic(double a, double b, double c)
+        private static void ValidateQuadraticArguments(double a)
         {
             if (Math.Abs(a) < double.Epsilon)
-                throw new ArgumentException("Коэффициент a не может быть равен 0");
+                throw new ArgumentException("Коэффициент a не может быть равен 0", nameof(a));
+        }
 
-            double discriminant = b * b - 4 * a * c;
+        private static double CalculateDiscriminant(double a, double b, double c)
+        {
+            return b * b - 4 * a * c;
+        }
 
-            // Нет действительных корней
+        private static double[] FindRoots(double a, double b, double discriminant)
+        {
             if (discriminant < -1e-10)
                 return new double[0];
 
-            // Один корень (дискриминант близок к нулю)
             if (Math.Abs(discriminant) < 1e-10)
                 return new double[] { -b / (2 * a) };
 
-            // Два корня
             double sqrtDiscriminant = Math.Sqrt(discriminant);
             return new double[]
             {
@@ -60,5 +107,7 @@ namespace MathLibrary
                 (-b - sqrtDiscriminant) / (2 * a)
             };
         }
+
+        #endregion
     }
 }
